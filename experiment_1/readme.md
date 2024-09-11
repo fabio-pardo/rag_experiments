@@ -22,6 +22,7 @@ as the answer for what programs are missing should be here.
 - In the `.env.example` file, set `LANGCHAIN_TRACING_V2` to `false` if
 you don't want LangChain Smith to be functioning. Otherwise, gather an API Key
 set them in the `.env.example` and change `.env.example` file to `.env`.
+- Make sure that `.env.example` PPTX vars are filled or else it won't work.
 
 ## What's the functionality for this experiment?
 
