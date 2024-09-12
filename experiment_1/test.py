@@ -1,13 +1,14 @@
 import os
-from langchain_core.prompts.chat import ChatPromptTemplate
-from langchain_ollama import ChatOllama, OllamaEmbeddings
+
 from dotenv import load_dotenv
-from langchain_community.document_loaders import UnstructuredPowerPointLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
-from langchain_core.runnables import RunnablePassthrough
+from langchain_community.document_loaders import UnstructuredPowerPointLoader
 from langchain_core.output_parsers import StrOutputParser
-from langchain import hub
+from langchain_core.prompts.chat import ChatPromptTemplate, HumanMessagePromptTemplate
+from langchain_core.prompts.prompt import PromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_ollama import ChatOllama, OllamaEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 def load_and_split_pptx(filepath):
@@ -49,19 +50,21 @@ def setup_rag_chain(retriever, llm_model):
     """
 
     prompt = ChatPromptTemplate(
-        [
-            (
-                "human",
-                """
-                You are an Virgin Voyages assistant for question-answering tasks.
-                Start each message with 'AHOY!' and speak like a pirate.
-                Use the following pieces of retrieved context to answer the question.
-                If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise.
-                Question: {question}
-                Context: {context}
-                Answer:
-                """,
-            )
+        messages=[
+            HumanMessagePromptTemplate(
+                prompt=PromptTemplate(
+                    input_variables=["context", "question"],
+                    template="""
+                        You are an Virgin Voyages assistant for question-answering tasks.
+                        Start each message with 'AHOY!' and speak like a pirate.
+                        Use the following pieces of retrieved context to answer the question.
+                        If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise.
+                        Question: {question}
+                        Context: {context}
+                        Answer:
+                        """,
+                )
+            ),
         ]
     )
 
