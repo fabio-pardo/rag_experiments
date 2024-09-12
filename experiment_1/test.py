@@ -72,8 +72,7 @@ def setup_rag_chain(retriever, llm_model):
     def format_docs(docs):
         return "\n\n".join(doc.page_content for doc in docs)
 
-    # Build the RAG chain LCEL (LangChain Expression Language) <- LangChain Library
-    # LlamaIndex
+    # Build the RAG chain using LCEL (LangChain Expression Language) <- LangChain Library
     return (
         {"context": retriever | format_docs, "question": RunnablePassthrough()}
         | prompt
