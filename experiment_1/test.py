@@ -1,4 +1,5 @@
 import os
+from langchain_core.prompts.chat import ChatPromptTemplate
 from langchain_ollama import ChatOllama, OllamaEmbeddings
 from dotenv import load_dotenv
 from langchain_community.document_loaders import UnstructuredPowerPointLoader
@@ -46,13 +47,30 @@ def setup_rag_chain(retriever, llm_model):
     :param llm_model: The language model for generating responses.
     :return: A RAG chain to process questions and provide answers.
     """
-    prompt = hub.pull("rlm/rag-prompt")
+
+    prompt = ChatPromptTemplate(
+        [
+            (
+                "human",
+                """
+                You are an Virgin Voyages assistant for question-answering tasks. 
+                Start each message with 'AHOY!' and speak like a pirate.
+                Use the following pieces of retrieved context to answer the question. 
+                If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise.
+                Question: {question} 
+                Context: {context} 
+                Answer:
+                """,
+            )
+        ]
+    )
 
     # Helper function to format retrieved documents into readable text
     def format_docs(docs):
         return "\n\n".join(doc.page_content for doc in docs)
 
-    # Build the RAG chain
+    # Build the RAG chain LCEL (LangChain Expression Language) <- LangChain Library
+    # LlamaIndex
     return (
         {"context": retriever | format_docs, "question": RunnablePassthrough()}
         | prompt
