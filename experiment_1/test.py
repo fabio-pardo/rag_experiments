@@ -54,15 +54,7 @@ def setup_rag_chain(retriever, llm_model):
             HumanMessagePromptTemplate(
                 prompt=PromptTemplate(
                     input_variables=["context", "question"],
-                    template="""
-                        You are an Virgin Voyages assistant for question-answering tasks.
-                        Start each message with 'AHOY!' and speak like a pirate.
-                        Use the following pieces of retrieved context to answer the question.
-                        If you don't know the answer, just say that you don't know. Use three sentences maximum and keep the answer concise.
-                        Question: {question}
-                        Context: {context}
-                        Answer:
-                        """,
+                    template=os.getenv("RAG_PROMPT") or "",
                 )
             ),
         ]
