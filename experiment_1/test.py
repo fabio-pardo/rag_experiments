@@ -1,12 +1,14 @@
 import os
-from langchain_ollama import ChatOllama, OllamaEmbeddings
+
 from dotenv import load_dotenv
-from langchain_community.document_loaders import UnstructuredPowerPointLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
-from langchain_core.runnables import RunnablePassthrough
+from langchain_community.document_loaders import UnstructuredPowerPointLoader
 from langchain_core.output_parsers import StrOutputParser
-from langchain import hub
+from langchain_core.prompts.chat import ChatPromptTemplate, HumanMessagePromptTemplate
+from langchain_core.prompts.prompt import PromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_ollama import ChatOllama, OllamaEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 def load_and_split_pptx(filepath):
@@ -46,13 +48,23 @@ def setup_rag_chain(retriever, llm_model):
     :param llm_model: The language model for generating responses.
     :return: A RAG chain to process questions and provide answers.
     """
-    prompt = hub.pull("rlm/rag-prompt")
+
+    prompt = ChatPromptTemplate(
+        messages=[
+            HumanMessagePromptTemplate(
+                prompt=PromptTemplate(
+                    input_variables=["context", "question"],
+                    template=os.getenv("RAG_PROMPT") or "",
+                )
+            ),
+        ]
+    )
 
     # Helper function to format retrieved documents into readable text
     def format_docs(docs):
         return "\n\n".join(doc.page_content for doc in docs)
 
-    # Build the RAG chain
+    # Build the RAG chain using LCEL (LangChain Expression Language) <- LangChain Library
     return (
         {"context": retriever | format_docs, "question": RunnablePassthrough()}
         | prompt
